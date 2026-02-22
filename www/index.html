@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farelino Alexander Kim | Portfolio</title>
+    <style>
+        /* CSS Reset & Setup */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a0a; /* Deep dark background */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden; /* Prevents scrollbars from the canvas */
+            color: #ffffff;
+        }
+
+        /* Interactive Canvas Background */
+        #dotGrid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Content Overlay */
+        .portfolio-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            pointer-events: none; /* Allows mouse events to pass through to the canvas */
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        p {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: #a0a0a0;
+            font-weight: 300;
+        }
+
+        /* Optional Accent Color */
+        .accent {
+            color: #00e5ff; /* Cyan accent for your university name */
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="dotGrid"></canvas>
+
+    <main class="portfolio-content">
+        <h1>Farelino Alexander Kim</h1>
+        <p>Student Lecturer at <span class="accent">Atma Jaya Yogyakarta University</span></p>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('dotGrid');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let dots = [];
+        
+        // Settings for the grid and highlight effect
+        const dotSpacing = 35; // Distance between dots
+        const baseRadius = 1.2; // Normal dot size
+        const highlightRadius = 150; // How far the mouse highlight reaches
+        const defaultColor = '#333333';
+        const highlightColor = '#00e5ff'; // Matches the accent text
+
+        let mouse = {
+            x: undefined,
+            y: undefined
+        };
+
+        // Track Mouse Movement
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        // Reset mouse position when it leaves the screen
+        window.addEventListener('mouseout', () => {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        // Setup the canvas size and generate the dot grid
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            dots = [];
+
+            // Generate coordinates for the dots
+            for (let x = dotSpacing / 2; x < width; x += dotSpacing) {
+                for (let y = dotSpacing / 2; y < height; y += dotSpacing) {
+                    dots.push({ x, y, radius: baseRadius });
+                }
+            }
+        }
+
+        // Adjust on window resize
+        window.addEventListener('resize', init);
+
+        // Animation Loop
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            dots.forEach(dot => {
+                let distance = 9999;
+                
+                // Calculate distance between mouse and the current dot
+                if (mouse.x !== undefined && mouse.y !== undefined) {
+                    const dx = mouse.x - dot.x;
+                    const dy = mouse.y - dot.y;
+                    distance = Math.sqrt(dx * dx + dy * dy);
+                }
+
+                ctx.beginPath();
+                
+                // If mouse is near, increase size and change color
+                if (distance < highlightRadius) {
+                    // Size scales up based on how close the mouse is
+                    dot.radius = baseRadius + ((highlightRadius - distance) * 0.02);
+                    ctx.fillStyle = highlightColor;
+                    
+                    // Optional: Fade out the highlight color based on distance
+                    ctx.globalAlpha = 1 - (distance / highlightRadius) + 0.2; 
+                } else {
+                    dot.radius = baseRadius;
+                    ctx.fillStyle = defaultColor;
+                    ctx.globalAlpha = 1;
+                }
+
+                ctx.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1; // Reset alpha
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize and start animation
+        init();
+        animate();
+    </script>
+</body>
+</html>

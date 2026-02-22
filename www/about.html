@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farelino Alexander Kim | Portfolio</title>
+    <style>
+        /* CSS Reset & Setup */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            background-color: #0a0a0a;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #ffffff;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            scroll-behavior: smooth;
+        }
+
+        /* Interactive Canvas Background */
+        #dotGrid {
+            position: fixed; /* Keeps dots fixed while scrolling */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Content Overlay */
+        .portfolio-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 20px;
+            pointer-events: none; /* Lets mouse interact with canvas behind it */
+        }
+
+        /* Glassmorphism containers for readability */
+        .content-section {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: left;
+            pointer-events: auto; /* Re-enable pointer events for text selection */
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 50px;
+            background: none;
+            border: none;
+            backdrop-filter: none;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00e5ff;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        p, li {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            font-weight: 300;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .accent {
+            color: #00e5ff;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="dotGrid"></canvas>
+
+    <main class="portfolio-content">
+            
+        <header class="content-section header-section">
+            <h1>Farelino Alexander Kim</h1>
+            <p>Informatics Student & Assistant Lecturer at <span class="accent">Atma Jaya Yogyakarta University</span> [cite: 10, 15]</p>
+        </header>
+
+        <section class="content-section">
+            <h2>About Me</h2>
+            <p>My name is Farelino Alexander Kim[cite: 4]. I grew up in the small town of Tasikmalaya, West Java, Indonesia[cite: 4]. Ever since I was little, I developed a strong interest in physics, electrical systems, and how everyday machines function[cite: 5, 6].</p>
+            <p>To overcome limited local resources and pursue greater opportunities, I moved to Yogyakarta to challenge myself, allowing my curiosity to evolve into a disciplined commitment to innovation and problem-solving[cite: 8, 10, 12].</p>
+        </section>
+
+        <section class="content-section">
+            <h2>Academics & Leadership</h2>
+            <ul>
+                <li>Beginning my fourth semester, I maintain a GPA of 3.9 out of 4, reflecting my dedication to academic excellence[cite: 14].</li>
+                <li>I serve as an assistant lecturer, guiding junior students through challenging materials and helping communicate complex ideas clearly[cite: 15, 16].</li>
+                <li>I was elected President of the Informatics Students Association (Himpunan Mahasiswa Informatika) at my university[cite: 18].</li>
+                <li>In this role, I lead strategic programs, academic support initiatives, and professional events to equip my peers with the skills to reach their full potential[cite: 19].</li>
+            </ul>
+        </section>
+
+        <section class="content-section">
+            <h2>Philosophy & Goals</h2>
+            <p>I believe that growth begins where comfort ends, and true progress requires the courage to seek environments that demand more from us[cite: 22]. Driven by this mindset, I am applying for the 2+2 program at Nanjing Xiaozhuang University to expand my global experience and immerse myself in advanced technologies[cite: 25, 27].</p>
+            <p>My academic focus is on software engineering[cite: 29]. Ultimately, my goal is not merely personal success, but to apply my knowledge to solve real-world problems and contribute positively to society as a responsible global professional[cite: 33, 34].</p>
+        </section>
+
+    </main>
+
+    <script>
+        const canvas = document.getElementById('dotGrid');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let dots = [];
+        
+        // Grid Settings
+        const dotSpacing = 35; 
+        const baseRadius = 1.2; 
+        const highlightRadius = 150; 
+        const defaultColor = '#333333';
+        const highlightColor = '#00e5ff'; 
+
+        let mouse = {
+            x: undefined,
+            y: undefined
+        };
+
+        // Track Mouse Movement
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        });
+
+        // Reset mouse position when it leaves the screen
+        window.addEventListener('mouseout', () => {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            dots = [];
+
+            for (let x = dotSpacing / 2; x < width; x += dotSpacing) {
+                for (let y = dotSpacing / 2; y < height; y += dotSpacing) {
+                    dots.push({ x, y, radius: baseRadius });
+                }
+            }
+        }
+
+        window.addEventListener('resize', init);
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            dots.forEach(dot => {
+                let distance = 9999;
+                
+                if (mouse.x !== undefined && mouse.y !== undefined) {
+                    const dx = mouse.x - dot.x;
+                    const dy = mouse.y - dot.y;
+                    distance = Math.sqrt(dx * dx + dy * dy);
+                }
+
+                ctx.beginPath();
+                
+                if (distance < highlightRadius) {
+                    dot.radius = baseRadius + ((highlightRadius - distance) * 0.02);
+                    ctx.fillStyle = highlightColor;
+                    ctx.globalAlpha = 1 - (distance / highlightRadius) + 0.2; 
+                } else {
+                    dot.radius = baseRadius;
+                    ctx.fillStyle = defaultColor;
+                    ctx.globalAlpha = 1;
+                }
+
+                ctx.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
